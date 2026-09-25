@@ -1,0 +1,14 @@
+/* LayoutWrapper.css */
+.layout-wrapper {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 48px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .layout-wrapper {
+    padding: 24px 16px;
+  }
+}
