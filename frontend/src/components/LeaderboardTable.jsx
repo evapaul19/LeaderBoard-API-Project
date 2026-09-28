@@ -4,7 +4,7 @@ import Avatar from './ui/Avatar';
 import { formatPoints } from '../utils/format';
 import EmptyState from './ui/EmptyState';
 
-export default function LeaderboardTable({ entries, onSelectEmployee }) {
+export default function LeaderboardTable({ entries, onSelectEmployee, selectedEmployeeId = null }) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('rank');
 
@@ -64,12 +64,15 @@ export default function LeaderboardTable({ entries, onSelectEmployee }) {
         <ol className="cr-rank-list">
           {filtered.map((employee, index) => {
             const width = `${(Number(employee.cumulative_score) / maxScore) * 100}%`;
+            const isSelected = selectedEmployeeId === employee.employee_id;
+            
             return (
               <li key={employee.employee_id}>
                 <button
                   type="button"
-                  className={`cr-rank-row anim-fade-slide-up stagger-${Math.min(index, 8)} ${employee.rank <= 3 ? 'is-top' : ''}`}
+                  className={`cr-rank-row anim-fade-slide-up stagger-${Math.min(index, 8)}${employee.rank <= 3 ? ' is-top' : ''}${isSelected ? ' selected' : ''}`}
                   onClick={() => onSelectEmployee(employee.employee_id)}
+                  aria-pressed={isSelected}
                 >
                   <span className={`lb-rank-pill r${employee.rank <= 3 ? employee.rank : ''}`}>
                     {employee.rank}

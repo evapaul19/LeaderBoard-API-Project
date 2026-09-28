@@ -7,7 +7,7 @@ const SLOTS = [
   { rank: 3, className: 'rank-3', step: 'step-3', label: '03' },
 ];
 
-export default function Podium({ entries, onSelectEmployee }) {
+export default function Podium({ entries, onSelectEmployee, selectedEmployeeId = null }) {
   const topThree = entries.slice(0, 3);
   if (topThree.length === 0) return null;
 
@@ -21,12 +21,15 @@ export default function Podium({ entries, onSelectEmployee }) {
           const employee = topThree.find((entry) => entry.rank === slot.rank) || topThree[slot.rank - 1];
           if (!employee) return <div key={slot.rank} />;
           const isFirst = slot.rank === 1;
+          const isSelected = selectedEmployeeId === employee.employee_id;
+          
           return (
             <button
               type="button"
               key={employee.employee_id}
-              className={`podium-slot ${slot.className} anim-fade-slide-up stagger-${index}`}
+              className={`podium-slot ${slot.className} anim-fade-slide-up stagger-${index}${isSelected ? ' selected' : ''}`}
               onClick={() => onSelectEmployee(employee.employee_id)}
+              aria-pressed={isSelected}
             >
               <div className="podium-card-inner">
                 <span className={`podium-rank-indicator rank-ind-${slot.rank}`}>{slot.label}</span>
