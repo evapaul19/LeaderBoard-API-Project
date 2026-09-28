@@ -1,0 +1,21 @@
+[33mf0c34cb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m refs/heads/main@{Fri Sep 25 18:48:10 2026}: reset: moving to origin/main
+[33mf0c34cb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{Fri Sep 25 18:48:10 2026}: reset: moving to origin/main
+[33m822dfda[m refs/heads/main@{Fri Sep 25 18:46:37 2026}: reset: moving to HEAD~2
+[33m822dfda[m HEAD@{Fri Sep 25 18:46:37 2026}: reset: moving to HEAD~2
+[33mf0c34cb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{Fri Sep 25 18:45:25 2026}: reset: moving to HEAD
+[33mf0c34cb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m refs/remotes/origin/main@{Fri Sep 25 17:35:36 2026}: update by push
+[33mf0c34cb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m refs/heads/main@{Fri Sep 25 17:35:17 2026}: commit: Migrate to src/ backend structure, add Alembic, Clerk auth, access requests, and React frontend
+[33mf0c34cb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{Fri Sep 25 17:35:17 2026}: commit: Migrate to src/ backend structure, add Alembic, Clerk auth, access requests, and React frontend
+[33m346743d[m refs/remotes/origin/main@{Fri Sep 18 15:47:04 2026}: update by push
+[33m346743d[m refs/heads/main@{Fri Sep 18 15:46:52 2026}: Branch: renamed refs/heads/master to refs/heads/main
+[33m346743d[m HEAD@{Fri Sep 18 15:46:52 2026}: Branch: renamed refs/heads/master to refs/heads/main
+[33m346743d[m refs/heads/main@{Fri Sep 18 15:37:24 2026}: commit: Organize project structure
+[33m346743d[m HEAD@{Fri Sep 18 15:37:24 2026}: commit: Organize project structure
+[33m822dfda[m refs/heads/main@{Fri Sep 18 15:32:28 2026}: commit: Organize FastAPI entry point
+[33m822dfda[m HEAD@{Fri Sep 18 15:32:28 2026}: commit: Organize FastAPI entry point
+[33m9425483[m refs/heads/main@{Fri Sep 18 15:31:15 2026}: commit: Organize employee model
+[33m9425483[m HEAD@{Fri Sep 18 15:31:15 2026}: commit: Organize employee model
+[33md5cf5a8[m refs/heads/main@{Fri Sep 18 15:23:31 2026}: commit: Organize database module
+[33md5cf5a8[m HEAD@{Fri Sep 18 15:23:31 2026}: commit: Organize database module
+[33m308bc65[m refs/heads/main@{Fri Sep 18 13:28:46 2026}: commit (initial): Initial project setup
+[33m308bc65[m HEAD@{Fri Sep 18 13:28:46 2026}: commit (initial): Initial project setup

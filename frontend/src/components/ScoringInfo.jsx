@@ -1,72 +1,42 @@
-import { useEffect, useRef, useState } from 'react';
-import { Info, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 import { ACTIVITIES } from '../constants/activities';
 
-export default function ScoringInfo() {
-  const [open, setOpen] = useState(false);
+export default function ScoringInfo({ isOpen, onClose }) {
   const panelRef = useRef(null);
 
   useEffect(() => {
-    if (!open) return;
-
-    function handleKeyDown(e) {
-      if (e.key === 'Escape') setOpen(false);
-    }
-
-    function handleClickOutside(e) {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleClickOutside);
-
+    if (!isOpen) return;
+    function onKey(e) { if (e.key === 'Escape') onClose(); }
+    function onClick(e) { if (panelRef.current && !panelRef.current.contains(e.target)) onClose(); }
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onClick);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onClick);
     };
-  }, [open]);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   return (
-    <div className="scoring-info">
-      <button
-        className="scoring-info-trigger"
-        onClick={() => setOpen(true)}
-      >
-        <Info size={14} />
-        How scoring works
-      </button>
-
-      {open && (
-        <div className="scoring-info-overlay">
-          <div className="scoring-info-panel" ref={panelRef}>
-            <button
-              className="drawer-close scoring-info-close"
-              onClick={() => setOpen(false)}
-              aria-label="Close"
-            >
-              <X size={18} />
-            </button>
-
-            <h3>How Scoring Works</h3>
-
-            <div className="scoring-info-list">
-              {ACTIVITIES.map((activity) => (
-                <div
-                  key={activity.name}
-                  className="scoring-info-row"
-                >
-                  <span>{activity.name}</span>
-                  <span className="scoring-info-points">
-                    {activity.points.toLocaleString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+    <div className="modal-overlay">
+      <div className="modal-card" ref={panelRef}>
+        <div className="modal-header">
+          <span className="modal-title">How Scoring Works</span>
+          <button className="drawer-close" onClick={onClose} aria-label="Close">
+            <X size={18} />
+          </button>
         </div>
-      )}
+        <div className="rules-list">
+          {ACTIVITIES.map((a) => (
+            <div key={a.name} className="rule-row">
+              <span className="rule-activity">{a.name}</span>
+              <span className="rule-points">+{a.points.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

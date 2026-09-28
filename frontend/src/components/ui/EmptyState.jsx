@@ -1,8 +1,9 @@
-export default function EmptyState({ icon: Icon, message }) {
+export default function EmptyState({ icon: Icon, message, action }) {
   return (
-    <div className="empty-state">
-      {Icon && <Icon size={32} strokeWidth={1.5} />}
+    <div className="cr-empty">
+      {Icon && <Icon size={28} strokeWidth={1.5} />}
       <p>{message}</p>
+      {action}
     </div>
   );
 }

@@ -4,29 +4,29 @@ import { getEmployeeScores } from '../api/api';
 import Loader from './ui/Loader';
 import EmptyState from './ui/EmptyState';
 import ScoreComposition from './ScoreComposition';
+import Avatar from './ui/Avatar';
+import { formatDate, formatPoints } from '../utils/format';
 
 export default function EmployeeDrawer({ employee, employeeId, isOpen, onClose }) {
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [displayEmployee, setDisplayEmployee] = useState(null);
+  const [openId, setOpenId] = useState(null);
 
-  // Keep showing the last-loaded employee during the close animation,
-  // instead of the content disappearing abruptly before the drawer slides out.
   useEffect(() => {
     if (employee) setDisplayEmployee(employee);
   }, [employee]);
 
   useEffect(() => {
-    if (!isOpen || !employeeId) return;
-
+    if (!isOpen || !employeeId) return undefined;
     let cancelled = false;
     setLoading(true);
     setError(null);
 
     getEmployeeScores(employeeId)
       .then((data) => {
-        if (!cancelled) setScores(data);
+        if (!cancelled) setScores(Array.isArray(data) ? data : []);
       })
       .catch((err) => {
         if (!cancelled) setError(err.message);
@@ -40,58 +40,88 @@ export default function EmployeeDrawer({ employee, employeeId, isOpen, onClose }
     };
   }, [employeeId, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
+  const totalScore =
+    displayEmployee?.cumulative_score ??
+    scores.reduce((sum, item) => sum + Number(item.score || 0), 0);
+
   return (
     <>
       <div className={`drawer-backdrop ${isOpen ? 'open' : ''}`} onClick={onClose} />
-      <div className={`drawer ${isOpen ? 'open' : ''}`}>
+      <aside className={`drawer ${isOpen ? 'open' : ''}`} aria-hidden={!isOpen}>
         {displayEmployee && (
           <>
-            <button className="drawer-close" onClick={onClose} aria-label="Close panel">
-              <X size={20} />
-            </button>
-
-            <div className="drawer-header">
-              <div className="drawer-name">{displayEmployee.name}</div>
-              <div className="drawer-email">{displayEmployee.email}</div>
-              <div className="drawer-total">{displayEmployee.cumulative_score.toLocaleString()}</div>
-              <div className="drawer-total-label">Total Points</div>
+            <div className="drawer-header-premium">
+              <span className="drawer-rank-badge">
+                {displayEmployee.rank ? `Rank ${displayEmployee.rank}` : 'Employee profile'}
+              </span>
+              <button className="drawer-close-btn" onClick={onClose} aria-label="Close employee panel">
+                <X size={16} />
+              </button>
             </div>
 
-            <div className="drawer-body">
-              {loading && (
-                <div className="center-loader">
-                  <Loader />
-                </div>
-              )}
+            <div className="drawer-profile-premium">
+              <Avatar name={displayEmployee.name} size="lg" highlighted />
+              <div className="drawer-name-premium">{displayEmployee.name}</div>
+              <div className="drawer-email-premium">{displayEmployee.email}</div>
+              <div className="drawer-score-premium">
+                <div className="drawer-score-num">{formatPoints(totalScore)}</div>
+                <div className="drawer-score-tag">Total points</div>
+              </div>
+            </div>
 
-              {error && <EmptyState message={`Couldn't load activity history: ${error}`} />}
+            {loading && (
+              <div className="center-loader">
+                <Loader />
+              </div>
+            )}
+            {error && <EmptyState message={`Couldn't load activity history: ${error}`} />}
+            {!loading && !error && scores.length === 0 && (
+              <EmptyState message="No activity recorded yet." />
+            )}
 
-              {!loading && !error && scores.length === 0 && (
-                <EmptyState message="No activity recorded yet." />
-              )}
-
-              {!loading && !error && scores.length > 0 && (
-                <>
-                  <h3 className="drawer-section-title">Score Composition</h3>
+            {!loading && !error && scores.length > 0 && (
+              <>
+                <section className="drawer-section-block">
+                  <div className="drawer-section-label">Score composition</div>
                   <ScoreComposition scores={scores} />
-
-                  <h3 className="drawer-section-title">Recent Achievements</h3>
-                  <div className="drawer-history">
-                    {scores.map((s) => (
-                      <div key={s.score_id} className="drawer-history-row">
-                        <span className="drawer-history-activity">{s.activity}</span>
-                        <span className="drawer-history-meta">
-                          {new Date(s.created_at).toLocaleDateString()} · +{s.score.toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+                </section>
+                <section className="drawer-section-block">
+                  <div className="drawer-section-label">Achievement timeline</div>
+                  {scores.map((score) => (
+                    <button
+                      type="button"
+                      key={score.score_id}
+                      className="timeline-item"
+                      onClick={() => setOpenId((current) => (current === score.score_id ? null : score.score_id))}
+                    >
+                      <span className="timeline-icon-dot" />
+                      <span style={{ flex: 1, textAlign: 'left' }}>
+                        <span className="timeline-activity-name">{score.activity}</span>
+                        <div className="timeline-date-small">{formatDate(score.created_at)}</div>
+                        {openId === score.score_id && (
+                          <div className="timeline-date-small">
+                            Recorded event · +{formatPoints(score.score)} points
+                          </div>
+                        )}
+                      </span>
+                      <span className="timeline-pts">+{formatPoints(score.score)}</span>
+                    </button>
+                  ))}
+                </section>
+              </>
+            )}
           </>
         )}
-      </div>
+      </aside>
     </>
   );
 }

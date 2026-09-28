@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { getAccessRequests, approveAccessRequest, rejectAccessRequest } from '../../api/api';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
+import { getInitials } from '../../utils/initials';
 import Loader from '../ui/Loader';
 import EmptyState from '../ui/EmptyState';
 import Toast from '../ui/Toast';
 
-export default function AccessRequestsPanel() {
+export default function AccessRequestsPanel({ onCountChange }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,9 +14,11 @@ export default function AccessRequestsPanel() {
 
   async function load() {
     setLoading(true);
+    setError(null);
     try {
       const data = await getAccessRequests('PENDING');
       setRequests(data);
+      onCountChange?.(data.length);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -25,14 +26,19 @@ export default function AccessRequestsPanel() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   async function handleDecision(id, action) {
     setActingOn(id);
     try {
       if (action === 'approve') await approveAccessRequest(id);
       else await rejectAccessRequest(id);
-      setToast({ type: 'success', message: `Request ${action === 'approve' ? 'approved' : 'rejected'}.` });
+      setToast({
+        type: 'success',
+        message: action === 'approve' ? 'Request approved. Employee created.' : 'Request rejected.',
+      });
       await load();
     } catch (err) {
       setToast({ type: 'error', message: err.message });
@@ -43,42 +49,43 @@ export default function AccessRequestsPanel() {
 
   return (
     <div className="admin-section">
-      <div className="admin-section-header">
-        <h2>Access Requests</h2>
-        <p>{requests.length} pending</p>
+      <div className="admin-header">
+        <h2 className="admin-title">Access requests</h2>
+        <p className="admin-desc">{loading ? 'Loading queue…' : `${requests.length} pending`}</p>
       </div>
 
       {loading && <div className="center-loader"><Loader /></div>}
       {error && <EmptyState message={`Couldn't load requests: ${error}`} />}
-
       {!loading && !error && requests.length === 0 && (
         <EmptyState message="No pending access requests." />
       )}
 
       {!loading && !error && requests.length > 0 && (
-        <div className="access-requests-list">
-          {requests.map((req) => (
-            <Card key={req.id} className="access-request-row">
-              <div>
-                <div className="access-request-name">{req.name}</div>
-                <div className="access-request-email">{req.email}</div>
+        <div className="access-req-list">
+          {requests.map((request) => (
+            <div key={request.id} className="access-req-card">
+              <div className="access-req-avatar">{getInitials(request.name)}</div>
+              <div className="access-req-info">
+                <div className="access-req-name">{request.name}</div>
+                <div className="access-req-email">{request.email}</div>
               </div>
-              <div className="access-request-actions">
-                <Button
-                  variant="secondary"
-                  disabled={actingOn === req.id}
-                  onClick={() => handleDecision(req.id, 'reject')}
+              <div className="access-req-actions">
+                <button
+                  className="btn-reject"
+                  disabled={actingOn === request.id}
+                  onClick={() => handleDecision(request.id, 'reject')}
                 >
-                  Reject
-                </Button>
-                <Button
-                  disabled={actingOn === req.id}
-                  onClick={() => handleDecision(req.id, 'approve')}
+                  {actingOn === request.id ? 'Working…' : 'Reject'}
+                </button>
+                <button
+                  className="btn-approve"
+                  disabled={actingOn === request.id}
+                  onClick={() => handleDecision(request.id, 'approve')}
                 >
-                  Approve
-                </Button>
+                  {actingOn === request.id ? 'Working…' : 'Approve'}
+                </button>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}

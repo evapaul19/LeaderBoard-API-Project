@@ -6,9 +6,7 @@ export default function Nav({ activeSection, onSectionChange, isAdmin, user }) {
   return (
     <header className="app-nav">
       <div className="app-nav-brand">
-        <span className="app-nav-logo">Achievement Hub</span>
-        <div className="app-nav-divider" />
-        <span className="app-nav-tag">Achievement Hub</span>
+        <span className="app-nav-tag">Achievement arena</span>
       </div>
 
       <nav className="app-nav-tabs" aria-label="Main navigation">
@@ -16,14 +14,14 @@ export default function Nav({ activeSection, onSectionChange, isAdmin, user }) {
           className={`app-nav-tab ${activeSection === 'dashboard' ? 'active' : ''}`}
           onClick={() => onSectionChange('dashboard')}
         >
-          Dashboard
+          Arena
         </button>
         {isAdmin && (
           <button
             className={`app-nav-tab ${activeSection === 'admin' ? 'active' : ''}`}
             onClick={() => onSectionChange('admin')}
           >
-            Admin Panel
+            Command
           </button>
         )}
       </nav>
@@ -34,17 +32,10 @@ export default function Nav({ activeSection, onSectionChange, isAdmin, user }) {
           <span className="user-email" title={user?.email || ''}>
             {user?.name || user?.email || 'Authenticated'}
           </span>
-          <span className="user-role-badge">
-            {isAdmin ? 'ADMIN' : 'MEMBER'}
-          </span>
+          <span className="user-role-badge">{isAdmin ? 'ADMIN' : 'MEMBER'}</span>
         </div>
-
-        <button 
-          className="sign-out-btn" 
-          onClick={() => signOut()}
-          title="Sign out"
-        >
-          Sign Out
+        <button className="sign-out-btn" onClick={() => signOut()} title="Sign out">
+          Sign out
         </button>
       </div>
     </header>

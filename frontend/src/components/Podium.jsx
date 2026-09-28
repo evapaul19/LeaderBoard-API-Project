@@ -1,36 +1,51 @@
-import Card from './ui/Card';
-import Badge from './ui/Badge';
+import { getInitials } from '../utils/initials';
+import { formatPoints } from '../utils/format';
 
-const PODIUM_CONFIG = [
-  { badgeVariant: 'silver', label: '2nd', order: 1 },
-  { badgeVariant: 'gold', label: '1st', order: 2 },
-  { badgeVariant: 'bronze', label: '3rd', order: 3 },
+const SLOTS = [
+  { rank: 2, className: 'rank-2', step: 'step-2', label: '02' },
+  { rank: 1, className: 'rank-1', step: 'step-1', label: '01' },
+  { rank: 3, className: 'rank-3', step: 'step-3', label: '03' },
 ];
 
-export default function Podium({ entries }) {
+export default function Podium({ entries, onSelectEmployee }) {
   const topThree = entries.slice(0, 3);
   if (topThree.length === 0) return null;
 
-  // Reorder for visual podium arrangement: 2nd, 1st, 3rd
-  const arranged = [topThree[1], topThree[0], topThree[2]].filter(Boolean);
-
   return (
-    <div className="podium">
-      {arranged.map((employee) => {
-        const originalIndex = topThree.indexOf(employee);
-        const config = PODIUM_CONFIG[originalIndex];
-        return (
-          <Card
-            key={employee.employee_id}
-            className={`podium-card podium-${config.badgeVariant}`}
-            style={{ order: config.order }}
-          >
-            <Badge variant={config.badgeVariant}>{config.label}</Badge>
-            <div className="podium-name">{employee.name}</div>
-            <div className="podium-score">{employee.cumulative_score} pts</div>
-          </Card>
-        );
-      })}
-    </div>
+    <section className="podium-section" id="podium">
+      <div className="section-heading">
+        <h2 className="section-title">The arena</h2>
+      </div>
+      <div className="podium-stage">
+        {SLOTS.map((slot, index) => {
+          const employee = topThree.find((entry) => entry.rank === slot.rank) || topThree[slot.rank - 1];
+          if (!employee) return <div key={slot.rank} />;
+          const isFirst = slot.rank === 1;
+          return (
+            <button
+              type="button"
+              key={employee.employee_id}
+              className={`podium-slot ${slot.className} anim-fade-slide-up stagger-${index}`}
+              onClick={() => onSelectEmployee(employee.employee_id)}
+            >
+              <div className="podium-card-inner">
+                <span className={`podium-rank-indicator rank-ind-${slot.rank}`}>{slot.label}</span>
+                <div className="podium-avatar-wrap">
+                  <div className={isFirst ? 'podium-avatar-xl' : 'podium-avatar-md'}>
+                    {getInitials(employee.name)}
+                  </div>
+                  <span className="podium-rank-num">{slot.rank}</span>
+                </div>
+                <div className="podium-emp-name">{employee.name}</div>
+                <div className="podium-emp-score">{formatPoints(employee.cumulative_score)}</div>
+                <div className="podium-emp-meta">points</div>
+                <span className="podium-open-hint">Open profile</span>
+              </div>
+              <div className={`podium-step-base ${slot.step}`} />
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
