@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     database_name: str
     database_user: str
     database_password: str
+    allowed_emails: str
+    allowed_email_domains: str
 
     clerk_secret_key: str
     clerk_jwt_key: str | None = None
