@@ -15,6 +15,20 @@
   overflow: hidden;
 }
 
+.signin-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 229, 176, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 176, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+}
+
 .signin-stage::after {
   content: '';
   position: absolute;
@@ -243,13 +257,73 @@
 
 .signin-card {
   position: relative;
-  padding: 36px 36px 24px;
+  padding: 0;
   background: rgba(21, 21, 21, 0.6);
   backdrop-filter: blur(22px) saturate(140%);
   -webkit-backdrop-filter: blur(22px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 6px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* Thin accent rule along the top edge of the glass card. */
+.signin-card::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 176, 0.55), transparent);
+  opacity: 0.7;
+}
+
+/* Card chrome bar, mirroring .signin-terminal-bar so both surfaces read the
+   same way. */
+.signin-card-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.signin-card-bar-dots { display: inline-flex; gap: 6px; }
+.signin-card-bar-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-hover);
+}
+.signin-card-bar-dots i.on { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+.signin-card-bar em {
+  font-style: normal;
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.signin-card-bar code {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(0, 229, 176, 0.25);
+  border-radius: 3px;
+  padding: 2px 8px;
+}
+
+.signin-card-body {
+  position: relative;
+  z-index: 1;
+  padding: 30px 36px 24px;
 }
 
 .signin-card::before {
@@ -328,14 +402,226 @@
 }
 .signin-card .cl-footerActionLink { color: var(--accent) !important; }
 
+/* Clerk's own sign in <-> sign up cross-link. Its href resolves to the
+   instance's Account Portal URL (accounts.dev), which is what pulled users
+   off-site. .signin-switch below replaces it; the rest of .cl-footer, which
+   carries Clerk branding / security / dev-mode notices, stays visible. */
+.signin-card .cl-auth-no-footer-action { display: none !important; }
+
 .signin-card .cl-socialButtonsBlockButton {
   background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: 4px !important;
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 .signin-card .cl-socialButtonsBlockButton:hover {
   background: rgba(0, 229, 176, 0.08) !important;
   border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(0, 229, 176, 0.1) !important;
+}
+
+/* The card header above already states the flow, so Clerk's duplicate heading
+   is suppressed to keep a single visual hierarchy. Clerk's own footer, which
+   carries branding / "protected by Clerk" / development notices, is untouched. */
+.signin-card .cl-headerTitle,
+.signin-card .cl-headerSubtitle,
+.signin-card .cl-headerLogo { display: none !important; }
+
+/* Clerk builds this cross-link from the sign-up page URL configured for the
+   instance (an accounts.dev address), which is what pulled users off-site.
+   .signin-switch replaces it in-app; the rest of .cl-footer stays visible. */
+.signin-card .cl-footerAction { display: none !important; }
+
+/* Loading state: Clerk hydrates async, so give the spinner our accent. */
+.signin-card .cl-spinner { color: var(--accent) !important; }
+.signin-card .cl-rootBox { animation: signin-clerk-in 320ms ease both; }
+
+/* ---------- Clerk <SignUp /> fields: make the longer form match the glass ---------- */
+
+.signin-card .cl-formField { margin-bottom: 14px; }
+
+.signin-card .cl-formFieldLabel {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.signin-card .cl-formFieldInput {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 4px !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+.signin-card .cl-formFieldInput:focus {
+  border-color: var(--accent) !important;
+  background: rgba(0, 229, 176, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(0, 229, 176, 0.12) !important;
+}
+.signin-card .cl-formFieldInputPlaceholder { color: var(--text-muted) !important; }
+.signin-card .cl-formFieldInputShowPasswordButton { color: var(--text-muted) !important; }
+
+.signin-card .cl-formButton,
+.signin-card .cl-formButtonPrimary {
+  background: var(--accent) !important;
+  color: var(--text-inverse) !important;
+  font-weight: 700 !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  transition: background 180ms ease;
+}
+.signin-card .cl-formButton:hover:not(:disabled),
+.signin-card .cl-formButtonPrimary:hover:not(:disabled) {
+  background: var(--accent-hover) !important;
+}
+.signin-card .cl-formButton:disabled,
+.signin-card .cl-formButtonPrimary:disabled { opacity: 0.55 !important; }
+
+.signin-card .cl-formFieldError,
+.signin-card .cl-formErrorMessage { color: var(--error) !important; }
+
+.signin-card .cl-formFieldSuccessIcon,
+.signin-card .cl-formFieldInputIconCheck { color: var(--accent) !important; }
+
+/* Password strength meter */
+.signin-card .cl-strengthMeterBar {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 2px !important;
+}
+.signin-card .cl-strengthMeterLevel0 { background: var(--error) !important; }
+.signin-card .cl-strengthMeterLevel1 { background: var(--warning) !important; }
+.signin-card .cl-strengthMeterLevel2 { background: var(--accent) !important; }
+.signin-card .cl-strengthMeterLevel3 { background: var(--accent) !important; }
+.signin-card .cl-strengthMeterText { color: var(--text-muted) !important; }
+
+/* Verification code (email OTP) */
+.signin-card .cl-otpCodeInput {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 4px !important;
+  color: var(--text-primary) !important;
+}
+.signin-card .cl-otpCodeInput:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(0, 229, 176, 0.12) !important;
+}
+.signin-card .cl-otpCodeField { color: var(--text-muted) !important; }
+
+/* Alerts (errors / notices) */
+.signin-card .cl-alert { border-radius: 4px !important; }
+.signin-card .cl-alert--danger {
+  background: var(--error-bg) !important;
+  color: var(--error) !important;
+  border: 1px solid rgba(255, 77, 77, 0.3) !important;
+}
+.signin-card .cl-alert--success {
+  background: var(--success-bg) !important;
+  color: var(--success) !important;
+  border: 1px solid rgba(0, 229, 176, 0.3) !important;
+}
+
+/* ---------- In-card sign in / sign up switch ---------- */
+
+.signin-switch {
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+.signin-switch:hover {
+  border-color: rgba(0, 229, 176, 0.3);
+  background: rgba(0, 229, 176, 0.04);
+}
+
+.signin-switch-text {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.signin-switch-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  position: relative;
+  transition: color 180ms ease;
+}
+.signin-switch-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.signin-switch-link:hover { color: var(--accent-hover); }
+.signin-switch-link:hover::after { transform: scaleX(1); }
+.signin-switch-link:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---------- Post sign-up expectations ---------- */
+
+.auth-note {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  background: rgba(0, 229, 176, 0.03);
+  border: 1px solid rgba(0, 229, 176, 0.14);
+  border-radius: 4px;
+}
+
+.auth-note-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.auth-note-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.auth-note-dot.ok { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.auth-note-dot.admin { background: var(--gold); box-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
+.auth-note-dot.pending { background: var(--warning); box-shadow: 0 0 8px rgba(255, 184, 0, 0.45); }
+
+.auth-note-label { color: var(--text-secondary); }
+.auth-note-value {
+  margin-left: auto;
+  color: var(--text-muted);
+  text-align: right;
 }
 
 /* ---------- Keyframes ---------- */
@@ -360,21 +646,61 @@
 @keyframes signin-type { to { width: 30ch; } }
 @keyframes signin-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 @keyframes signin-shine { to { background-position: -200% 0; } }
+@keyframes signin-clerk-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 /* ---------- Responsive ---------- */
+
+@media (max-width: 1080px) {
+  .signin-stage {
+    gap: 40px;
+    padding: 56px clamp(24px, 5vw, 56px);
+  }
+  .signin-headline { font-size: clamp(2.5rem, 5.6vw, 3.6rem); }
+}
 
 @media (max-width: 900px) {
   .signin-stage {
     grid-template-columns: 1fr;
     align-content: start;
-    gap: 44px;
-    padding: 40px 22px 64px;
+    gap: 40px;
+    padding: 40px 22px 56px;
   }
   .signin-headline { font-size: clamp(2.2rem, 9vw, 3.1rem); }
+  .signin-body { line-height: 1.7; }
   .signin-shape { display: none; }
+  .signin-stage::before { background-size: 44px 44px; }
 }
 
 @media (max-width: 600px) {
   .signin-terminal { display: none; }
-  .signin-card { padding: 28px 22px 20px; }
+  .signin-card-body { padding: 24px 18px 18px; }
+  .signin-card-title { font-size: 1.4rem; }
+  .signin-switch { flex-direction: column; gap: 6px; }
+  .signin-card-bar { padding: 11px 16px; }
+  .auth-note { padding: 12px 13px; }
+  .auth-note-row { font-size: 0.66rem; }
+  .auth-note-label { flex-shrink: 0; }
+}
+
+@media (max-width: 400px) {
+  /* Labels and values no longer fit side by side. */
+  .auth-note-row { flex-wrap: wrap; }
+  .auth-note-value { margin-left: 15px; text-align: left; }
+  .signin-card-bar code { display: none; }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .signin-orb,
+  .signin-shape svg,
+  .signin-headline-accent,
+  .t-cursor,
+  .signin-card .cl-rootBox { animation: none !important; }
+  .signin-reveal,
+  .signin-card-wrap { opacity: 1 !important; animation: none !important; }
+  .signin-orb { transform: none !important; }
 }

@@ -1,0 +1,46 @@
+# Build context filter for the BACKEND image (build context = repository root).
+#
+# This matters here: the build context is the whole repository, which contains a
+# live .env holding a real Clerk secret key and database password, a populated
+# .venv, and frontend/node_modules. Nothing below is needed to run the API, so
+# none of it should ever reach the Docker daemon.
+
+# --- secrets and local environment -----------------------------------------
+.env
+.env.*
+*.env
+
+# --- Python ----------------------------------------------------------------
+.venv
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# --- frontend --------------------------------------------------------------
+# This image is backend-only. Excluding this keeps node_modules (hundreds of MB)
+# out of the context; the frontend has its own image built from ./frontend.
+frontend/
+
+# --- stray / superseded artifacts ------------------------------------------
+# The API is served as src.main:app, so the duplicate root main.py is unused.
+# NOTE: src/leaderboard_api_project/ must NOT be excluded -- uv_build builds the
+# project from it during `uv sync`.
+main.py
+recovery/
+ck*
+
+# --- VCS and Docker plumbing -----------------------------------------------
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# --- docs and editor cruft -------------------------------------------------
+# README.md is deliberately re-included: `uv sync` builds this project via
+# uv_build, which reads `readme = "README.md"` from pyproject.toml.
+*.md
+!README.md
