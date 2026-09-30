@@ -1,13 +1,26 @@
 [project]
-name = "leaderboard-project"
+name = "leaderboard-api-project"
 version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Lalan Kumar", email = "21e51a6932@hitam.org" }
+]
 requires-python = ">=3.12"
 dependencies = [
-    "alembic==1.20.0",
-    "clerk-backend-api==7.0.0",
-    "fastapi==0.141.1",
-    "psycopg2-binary==2.9.13",
-    "pydantic-settings==2.15.0",
-    "sqlmodel==0.0.42",
-    "uvicorn==0.53.0",
+    "alembic>=1.20.0",
+    "clerk-backend-api>=7.0.0",
+    "fastapi>=0.142.1",
+    "psycopg2-binary>=2.9.13",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "sqlmodel>=0.0.47",
+    "uvicorn>=0.54.0",
 ]
+
+[project.scripts]
+leaderboard-api-project = "leaderboard_api_project:main"
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"

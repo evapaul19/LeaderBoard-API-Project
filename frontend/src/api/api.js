@@ -1,7 +1,16 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Injected by App.jsx once Clerk is loaded via useAuth() hook.
+// This is more reliable than window.Clerk?.session?.getToken() which
+// can be undefined if Clerk hasn't fully initialised yet.
+let _getToken = null;
+
+export function setTokenGetter(fn) {
+  _getToken = fn;
+}
+
 async function request(path, options = {}) {
-  const token = await window.Clerk?.session?.getToken();
+  const token = _getToken ? await _getToken() : await window.Clerk?.session?.getToken();
 
   console.log(
     `[API] ${options.method || 'GET'} ${path} — token present:`,

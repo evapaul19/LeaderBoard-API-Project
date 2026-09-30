@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { SignIn } from '@clerk/clerk-react';
+import { useEffect, useRef, useState } from 'react';
+import { SignIn, SignUp } from '@clerk/clerk-react';
 import '../styles/signin.css';
 
 const clerkAppearance = {
@@ -18,6 +18,20 @@ const clerkAppearance = {
 export default function SignInPage() {
   const stageRef = useRef(null);
   const cardRef = useRef(null);
+
+  // Track whether Clerk's hash routing has put us on the sign-up flow.
+  // Clerk uses #/sign-up and #/sign-in when routing="hash".
+  const [isSignUp, setIsSignUp] = useState(
+    () => window.location.hash.startsWith('#/sign-up')
+  );
+
+  useEffect(() => {
+    function onHashChange() {
+      setIsSignUp(window.location.hash.startsWith('#/sign-up'));
+    }
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   // Mouse parallax for the backdrop and floating shapes
   useEffect(() => {
@@ -110,20 +124,34 @@ export default function SignInPage() {
 
         <div className="signin-card" ref={cardRef} onMouseMove={handleCardMove}>
           <div className="signin-card-header">
-            <span className="signin-eyebrow">Sign in</span>
-            <h2 className="signin-card-title">Welcome back</h2>
-            <p className="signin-card-sub">Sign in with your Google account to continue.</p>
+            <span className="signin-eyebrow">{isSignUp ? 'Sign up' : 'Sign in'}</span>
+            <h2 className="signin-card-title">{isSignUp ? 'Create account' : 'Welcome back'}</h2>
+            <p className="signin-card-sub">
+              {isSignUp
+                ? 'Sign up with your Google account to get started.'
+                : 'Sign in with your Google account to continue.'}
+            </p>
           </div>
 
           <div className="signin-divider" />
 
-          <SignIn
-            routing="hash"
-            oauthFlow="redirect"
-            fallbackRedirectUrl="/"
-            signUpFallbackRedirectUrl="/"
-            appearance={clerkAppearance}
-          />
+          {isSignUp ? (
+            <SignUp
+              routing="hash"
+              fallbackRedirectUrl="/"
+              signInUrl="#/sign-in"
+              appearance={clerkAppearance}
+            />
+          ) : (
+            <SignIn
+              routing="hash"
+              oauthFlow="redirect"
+              fallbackRedirectUrl="/"
+              signUpUrl="#/sign-up"
+              signUpFallbackRedirectUrl="/"
+              appearance={clerkAppearance}
+            />
+          )}
         </div>
       </div>
     </div>

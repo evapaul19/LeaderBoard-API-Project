@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/clerk-react';
-import { getMe, createAccessRequest } from './api/api';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import { getMe, createAccessRequest, setTokenGetter } from './api/api';
 import SignInPage from './pages/SignInPage';
 import WaitingPage from './pages/WaitingPage';
 import AppShell from './components/AppShell';
@@ -8,9 +8,19 @@ import Loader from './components/ui/Loader';
 
 export default function App() {
   const { isLoaded, isSignedIn } = useUser();
+  const { getToken } = useAuth();
   const [me, setMe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Inject the Clerk getToken function into the API layer as soon as
+  // Clerk finishes loading. This avoids the race condition where
+  // window.Clerk?.session is still undefined on first render.
+  useEffect(() => {
+    if (isLoaded) {
+      setTokenGetter(getToken);
+    }
+  }, [isLoaded, getToken]);
 
   useEffect(() => {
     console.log('[Clerk] isLoaded:', isLoaded, 'isSignedIn:', isSignedIn); // TEMP DEBUG
@@ -48,7 +58,7 @@ export default function App() {
       }
     }
     resolveAccess();
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, getToken]);
 
   if (!isLoaded || loading) {
     return (
