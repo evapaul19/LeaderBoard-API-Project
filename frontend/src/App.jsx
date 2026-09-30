@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { getMe, createAccessRequest, setTokenGetter } from './api/api';
 import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
 import WaitingPage from './pages/WaitingPage';
 import AppShell from './components/AppShell';
 import Loader from './components/ui/Loader';
+import useAuthRoute, { AUTH_ROUTES } from './hooks/useAuthRoute';
 
 export default function App() {
   const { isLoaded, isSignedIn } = useUser();
@@ -12,6 +14,20 @@ export default function App() {
   const [me, setMe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Which auth screen is showing. Clerk's <SignIn>/<SignUp> are given an
+  // explicit `path`, which only matches on /auth/sign-in and /auth/sign-up.
+  const { isSignUp, isAuthRoute, goToSignIn, goToSignUp } = useAuthRoute();
+
+  // A signed-out visitor on any other path (e.g. "/") would mount Clerk with a
+  // path that matches no route, leaving the mount point empty. Normalise to
+  // /auth/sign-in first. Gated on !isSignedIn so the app root keeps working
+  // for signed-in users.
+  useEffect(() => {
+    if (isLoaded && !isSignedIn && !isAuthRoute) {
+      window.location.replace(AUTH_ROUTES.signIn);
+    }
+  }, [isLoaded, isSignedIn, isAuthRoute]);
 
   // Inject the Clerk getToken function into the API layer as soon as
   // Clerk finishes loading. This avoids the race condition where
@@ -68,7 +84,20 @@ export default function App() {
     );
   }
 
-  if (!isSignedIn) return <SignInPage />;
+  if (!isSignedIn && !isAuthRoute) {
+    // Waiting for the redirect above; never render Clerk against a non-auth path.
+    return (
+      <div className="center-loader full-screen">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return isSignUp
+      ? <SignUpPage onSignIn={goToSignIn} />
+      : <SignInPage onSignUp={goToSignUp} />;
+  }
   if (error) return <WaitingPage status="ERROR" me={null} error={error} />;
   if (me?.status === 'APPROVED') return <AppShell role={me.role} user={me} />;
 
